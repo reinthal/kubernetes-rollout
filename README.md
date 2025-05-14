@@ -51,7 +51,7 @@ Build 'hcloud.talos' finished after 4 minutes 27 seconds.
 - [x] Add tailscale to my own machine
 - [x] Configure Tailscale for my omni nodes
 - [x] Provision Kubernetes cluster: 2 Pomodoros (50 min)
-- [ ] authenticate to the cluster using kubectl and kubelogin
+- [x] authenticate to the cluster using kubectl and kubelogin
 - [ ] Provision developer boxes: 2 Pomodoros (50 min)
 - [ ] Set up Tailscale SSH access: 1 Pomodoro (25 min)
 
@@ -68,4 +68,5 @@ Build 'hcloud.talos' finished after 4 minutes 27 seconds.
 
 # Buffer (1 Pomodoro)
 
+- [ ] patch devenv.nix to include the oidc-login plugin
 - Troubleshooting/unexpected issues: 1 Pomodoro (25 min)
