@@ -21,14 +21,6 @@ resource "hcloud_server" "omni_nodes" {
   location    = var.location
   ssh_keys    = [hcloud_ssh_key.default.id]
   
-  # Use user_data to bootstrap the nodes for Omni/Talos
-  user_data = templatefile("${path.module}/templates/cloudinit.yaml", {
-    node_name = "omni-node-${count.index + 1}"
-    node_role = count.index == 0 ? "control-plane" : "worker"
-    tailscale_authkey = var.tailscale_authkey
-    tailscale_extra_args = var.tailscale_extra_args
-  })
-
   labels = {
     role = count.index == 0 ? "control-plane" : "worker"
   }
