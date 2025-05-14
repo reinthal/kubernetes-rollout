@@ -1,0 +1,15 @@
+#cloud-config
+hostname: ${node_name}
+fqdn: ${node_name}.example.com
+manage_etc_hosts: true
+
+packages:
+  - curl
+  - wget
+  - jq
+
+runcmd:
+  # Install Omni prerequisites
+  - curl -sfL https://raw.githubusercontent.com/siderolabs/omni/main/install.sh | bash -s
+  - echo "NODE_ROLE=${node_role}" > /etc/omni-node-config
+  # Additional setup commands for Omni/Talos can be added here 
