@@ -8,7 +8,8 @@
   # https://devenv.sh/packages/
   packages = with pkgs; [ 
     git 
-    terraform 
+    terraform
+    packer
     sops
     age
     tailscale

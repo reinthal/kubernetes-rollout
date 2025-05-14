@@ -16,6 +16,12 @@ variable "image" {
   default     = "ubuntu-22.04" # Base image for Talos/Omni
 }
 
+variable "snapshot_id" {
+  description = "ID of the Hetzner snapshot to use"
+  type        = string
+  default     = "237425437"
+}
+
 variable "location" {
   description = "Hetzner datacenter location"
   type        = string

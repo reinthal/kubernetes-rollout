@@ -10,6 +10,9 @@
 
 # Stretch: reliability
 
+
+[ x  x  x > 0  0  0  0  0  0  0  0  0  0  0  0  0]
+
 Open-ended stretch: reliability
 
 7. Implement basic monitoring with Prometheus and Grafana
@@ -19,6 +22,16 @@ Open-ended stretch: reliability
 # summary of tasks
 
 1. Provision 3 Omni nodes on Hetzner Cloud. Use Terraform.
+
+```
+Build 'hcloud.talos' finished after 4 minutes 27 seconds.
+
+==> Wait completed after 4 minutes 27 seconds
+
+==> Builds finished. The artifacts of successful builds are:
+--> hcloud.talos: A snapshot was created: 'Omni Image' (ID: 237425437)
+```
+
 2. Provision a Kubernetes cluster with 1 control node and 2 workers
 3. Provision developer boxes
 4. Set up access to dev boxes with Tailscale SSH bonus: set up GitOps for

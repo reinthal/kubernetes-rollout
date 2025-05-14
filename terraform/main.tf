@@ -17,7 +17,7 @@ resource "hcloud_server" "omni_nodes" {
   count       = 3
   name        = "omni-node-${count.index + 1}"
   server_type = var.server_type
-  image       = var.image
+  image       = var.snapshot_id
   location    = var.location
   ssh_keys    = [hcloud_ssh_key.default.id]
   
