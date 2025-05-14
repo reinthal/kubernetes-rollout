@@ -11,7 +11,7 @@
 # Stretch: reliability
 
 
-[ x  x  x  x  0  0  0  0  0  0  0  0  0  0  0  0]
+[ x  x  x  x  x  x  x  >  0  0  0  0  0  0  0  0]
 
 Open-ended stretch: reliability
 
@@ -47,8 +47,11 @@ Build 'hcloud.talos' finished after 4 minutes 27 seconds.
 
 # Baseline (7 Pomodoros)
 
-- [ ] Provision 3 Omni nodes with Terraform: 2 Pomodoros (50 min)
-- [ ] Provision Kubernetes cluster: 2 Pomodoros (50 min)
+- [x] Provision 3 Omni nodes with Terraform: 2 Pomodoros (50 min)
+- [x] Add tailscale to my own machine
+- [x] Configure Tailscale for my omni nodes
+- [x] Provision Kubernetes cluster: 2 Pomodoros (50 min)
+- [ ] authenticate to the cluster using kubectl and kubelogin
 - [ ] Provision developer boxes: 2 Pomodoros (50 min)
 - [ ] Set up Tailscale SSH access: 1 Pomodoro (25 min)
 

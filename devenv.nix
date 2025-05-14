@@ -14,6 +14,7 @@
     omnictl
     hcloud
     kubectl
+    krew
     kubelogin
     talosctl
     jq
