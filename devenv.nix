@@ -4,11 +4,19 @@
   # https://devenv.sh/basics/
   env.GREET = "devenv";
   
-  # Terraform environment variables
-  env.TF_VAR_region = "us-west-2";  # Example variable
-  
+
   # https://devenv.sh/packages/
-  packages = with pkgs; [ git terraform ];
+  packages = with pkgs; [ 
+    git 
+    terraform 
+    sops
+    age
+    tailscale
+    kubectl
+    talosctl
+    jq
+    curl
+  ];
 
   # https://devenv.sh/languages/
   # languages.rust.enable = true;
@@ -28,12 +36,6 @@
     hello
     git --version
   '';
-
-  # https://devenv.sh/tasks/
-  # tasks = {
-  #   "myproj:setup".exec = "mytool build";
-  #   "devenv:enterShell".after = [ "myproj:setup" ];
-  # };
 
   # https://devenv.sh/tests/
   enterTest = ''
