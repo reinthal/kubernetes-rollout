@@ -22,7 +22,7 @@ resource "hcloud_server" "omni_nodes" {
   ssh_keys    = [hcloud_ssh_key.default.id]
   
   # Use user_data to bootstrap the nodes for Omni/Talos
-  user_data = templatefile("${path.module}/templates/user_data.yaml", {
+  user_data = templatefile("${path.module}/templates/cloudinit.yaml", {
     node_name = "omni-node-${count.index + 1}"
     node_role = count.index == 0 ? "control-plane" : "worker"
   })
@@ -41,7 +41,15 @@ resource "hcloud_ssh_key" "default" {
 # Create a network for the nodes
 resource "hcloud_network" "omni_network" {
   name     = "omni-network"
-  ip_range = "10.0.0.0/24"
+  ip_range = "10.0.0.0/16"
+}
+
+# Create a subnet within the network
+resource "hcloud_network_subnet" "omni_subnet" {
+  network_id   = hcloud_network.omni_network.id
+  type         = "cloud"
+  network_zone = "eu-central"
+  ip_range     = "10.0.1.0/24"
 }
 
 # Attach servers to the network
@@ -49,7 +57,12 @@ resource "hcloud_server_network" "omni_network_attachment" {
   count      = 3
   server_id  = hcloud_server.omni_nodes[count.index].id
   network_id = hcloud_network.omni_network.id
-  ip         = "10.0.0.${count.index + 10}"
+  
+  # Remove the explicit IP assignment and let Hetzner assign IPs automatically
+  # ip         = "10.0.0.${count.index + 10}"
+  
+  # Make sure the subnet is created before attaching servers
+  depends_on = [hcloud_network_subnet.omni_subnet]
 }
 
 # Output the server IPs
