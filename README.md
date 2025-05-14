@@ -54,7 +54,7 @@ Build 'hcloud.talos' finished after 4 minutes 27 seconds.
 - [x] authenticate to the cluster using kubectl and kubelogin
 ![image](https://github.com/user-attachments/assets/a02c5ba7-606e-47b8-b1b4-b94f7b858645)
 
-
+- [x] set fluxcd
 - [ ] Provision developer boxes: 2 Pomodoros (50 min)
 - [ ] Set up Tailscale SSH access: 1 Pomodoro (25 min)
 

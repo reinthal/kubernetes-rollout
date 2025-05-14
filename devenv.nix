@@ -18,6 +18,7 @@
     krew
     kubelogin-oidc
     talosctl
+    k9s
     jq
     curl
   ];
