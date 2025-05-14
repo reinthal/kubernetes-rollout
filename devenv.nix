@@ -17,6 +17,7 @@
     kubectl
     krew
     kubelogin-oidc
+    kubernetes-helm
     talosctl
     k9s
     jq
