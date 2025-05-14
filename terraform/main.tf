@@ -35,7 +35,7 @@ resource "hcloud_server" "omni_nodes" {
 # SSH key for accessing the servers
 resource "hcloud_ssh_key" "default" {
   name       = "omni-ssh-key"
-  public_key = file(var.ssh_public_key_path)
+  public_key = var.ssh_public_key
 }
 
 # Create a network for the nodes
