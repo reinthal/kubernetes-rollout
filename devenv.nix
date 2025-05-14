@@ -10,6 +10,7 @@
     packer
     sops
     age
+    kubeconform
     tailscale
     omnictl
     fluxcd
