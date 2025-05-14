@@ -25,6 +25,8 @@ resource "hcloud_server" "omni_nodes" {
   user_data = templatefile("${path.module}/templates/cloudinit.yaml", {
     node_name = "omni-node-${count.index + 1}"
     node_role = count.index == 0 ? "control-plane" : "worker"
+    tailscale_authkey = var.tailscale_authkey
+    tailscale_extra_args = var.tailscale_extra_args
   })
 
   labels = {
