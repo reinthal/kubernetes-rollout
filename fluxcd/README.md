@@ -8,7 +8,7 @@ then
 
 ```
 flux bootstrap github \
-    --context=default \
+    --context=reinthal-talos-default \
     --owner=${GITHUB_USER} \
     --repository=${GITHUB_REPO} \
     --branch=main \
