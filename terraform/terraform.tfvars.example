@@ -1,6 +1,0 @@
-# Copy this file to terraform.tfvars and fill in your values
-# hetzner_api_key = "your_api_key_here" # Better to use environment variable TF_VAR_hetzner_api_key
-server_type = "cx21"
-image = "ubuntu-22.04"
-location = "nbg1"
-ssh_public_key_path = "~/.ssh/id_rsa.pub" 
