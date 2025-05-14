@@ -11,7 +11,7 @@
 # Stretch: reliability
 
 
-[ x  x  x > 0  0  0  0  0  0  0  0  0  0  0  0  0]
+[ x  x  x  x  0  0  0  0  0  0  0  0  0  0  0  0]
 
 Open-ended stretch: reliability
 
