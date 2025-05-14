@@ -12,10 +12,11 @@
     age
     tailscale
     omnictl
+    fluxcd
     hcloud
     kubectl
     krew
-    kubelogin
+    kubelogin-oidc
     talosctl
     jq
     curl
