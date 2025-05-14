@@ -52,7 +52,8 @@ Build 'hcloud.talos' finished after 4 minutes 27 seconds.
 - [x] Configure Tailscale for my omni nodes
 - [x] Provision Kubernetes cluster: 2 Pomodoros (50 min)
 - [x] authenticate to the cluster using kubectl and kubelogin
-- [ ] ![image](https://github.com/user-attachments/assets/6f82d488-5283-4ae1-8694-1db74db962d2)
+![image](https://github.com/user-attachments/assets/a02c5ba7-606e-47b8-b1b4-b94f7b858645)
+
 
 - [ ] Provision developer boxes: 2 Pomodoros (50 min)
 - [ ] Set up Tailscale SSH access: 1 Pomodoro (25 min)
