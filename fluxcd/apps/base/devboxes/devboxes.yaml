@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: devbox
+  namespace: devboxes
+spec:
+  serviceName: devbox
+  replicas: 2  
+  selector:
+    matchLabels:
+      app: devbox
+  template:
+    metadata:
+      labels:
+        app: devbox
+    spec:
+      containers:
+      - name: devbox
+        image: nixos/nix:latest
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN"]  # Required for Tailscale
+        env:
+        - name: TAILSCALE_AUTH_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tailscale-secret
+              key: auth_key
+        volumeMounts:
+        - name: data
+          mountPath: /home/developer
+        - name: nix-store
+          mountPath: /nix/store
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: nix-store
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi

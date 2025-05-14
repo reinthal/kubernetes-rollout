@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../base/podinfo
   - ../base/tailscale
+  - ../base/devboxes
 patches:
   - path: podinfo-values.yaml
     target:
