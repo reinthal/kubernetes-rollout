@@ -68,14 +68,13 @@ resource "talos_machine_secrets" "this" {
 # create the control plane and apply generated config in user_data
 resource "hcloud_server" "controlplane_server" {
   name        = "talos-controlplane"
-  image       = var.image
+  image       = var.snapshot_id
   server_type = var.controlplane_type
   location    = var.location
   labels      = { type = "talos-controlplane" }
   user_data   = data.talos_machine_configuration.controlplane.machine_configuration
   network {
     network_id = hcloud_network.network.id
-    ip         = var.controlplane_ip
   }
   depends_on = [
     hcloud_network_subnet.subnet,
@@ -95,7 +94,7 @@ resource "talos_machine_bootstrap" "bootstrap" {
 resource "hcloud_server" "worker_server" {
   for_each    = var.workers
   name        = each.value.name
-  image       = var.image
+  image       = var.snapshot_id
   server_type = each.value.server_type
   location    = each.value.location
   labels      = { type = "talos-worker" }
