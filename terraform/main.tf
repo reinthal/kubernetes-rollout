@@ -1,71 +1,127 @@
-terraform {
-  required_providers {
-    hcloud = {
-      source  = "hetznercloud/hcloud"
-      version = "~> 1.45.0"
-    }
-  }
-  required_version = ">= 1.0.0"
+# create the private network
+resource "hcloud_network" "network" {
+  name     = var.private_network_name
+  ip_range = var.private_network_ip_range
 }
 
-provider "hcloud" {
-  token = var.hetzner_api_key
-}
-
-# Create 3 Omni nodes
-resource "hcloud_server" "omni_nodes" {
-  count       = 3
-  name        = "omni-node-${count.index + 1}"
-  server_type = var.server_type
-  image       = var.snapshot_id
-  location    = var.location
-  ssh_keys    = [hcloud_ssh_key.default.id]
-  
-  labels = {
-    role = count.index == 0 ? "control-plane" : "worker"
-  }
-}
-
-# SSH key for accessing the servers
-resource "hcloud_ssh_key" "default" {
-  name       = "omni-ssh-key"
-  public_key = var.ssh_public_key
-}
-
-# Create a network for the nodes
-resource "hcloud_network" "omni_network" {
-  name     = "omni-network"
-  ip_range = "10.0.0.0/16"
-}
-
-# Create a subnet within the network
-resource "hcloud_network_subnet" "omni_subnet" {
-  network_id   = hcloud_network.omni_network.id
+resource "hcloud_network_subnet" "subnet" {
+  network_id   = hcloud_network.network.id
   type         = "cloud"
-  network_zone = "eu-central"
-  ip_range     = "10.0.1.0/24"
+  network_zone = var.network_zone
+  ip_range     = var.private_network_subnet_range
 }
 
-# Attach servers to the network
-resource "hcloud_server_network" "omni_network_attachment" {
-  count      = 3
-  server_id  = hcloud_server.omni_nodes[count.index].id
-  network_id = hcloud_network.omni_network.id
-  
-  # Remove the explicit IP assignment and let Hetzner assign IPs automatically
-  # ip         = "10.0.0.${count.index + 10}"
-  
-  # Make sure the subnet is created before attaching servers
-  depends_on = [hcloud_network_subnet.omni_subnet]
+# create the load balancer
+resource "hcloud_load_balancer" "controlplane_load_balancer" {
+  name               = "talos-lb"
+  load_balancer_type = var.load_balancer_type
+  network_zone       = var.network_zone
 }
 
-# Output the server IPs
-output "server_ips" {
-  value = {
-    for idx, server in hcloud_server.omni_nodes : server.name => {
-      public_ip  = server.ipv4_address
-      private_ip = hcloud_server_network.omni_network_attachment[idx].ip
-      role       = idx == 0 ? "control-plane" : "worker"
-    }
+# attach the load balancer to the private network
+resource "hcloud_load_balancer_network" "srvnetwork" {
+  load_balancer_id = hcloud_load_balancer.controlplane_load_balancer.id
+  network_id       = hcloud_network.network.id
+}
+
+# add the control plane to the load balancer
+resource "hcloud_load_balancer_target" "load_balancer_target" {
+  type             = "server"
+  load_balancer_id = hcloud_load_balancer.controlplane_load_balancer.id
+  server_id        = hcloud_server.controlplane_server.id
+  use_private_ip   = true
+  depends_on = [
+    hcloud_server.controlplane_server
+  ]
+}
+
+# loadbalance kubectl port
+resource "hcloud_load_balancer_service" "controlplane_load_balancer_service_kubectl" {
+  load_balancer_id = hcloud_load_balancer.controlplane_load_balancer.id
+  protocol         = "tcp"
+  listen_port      = 6443
+  destination_port = 6443
+}
+
+# loadbalance talosctl
+resource "hcloud_load_balancer_service" "controlplane_load_balancer_service_talosctl" {
+  load_balancer_id = hcloud_load_balancer.controlplane_load_balancer.id
+  protocol         = "tcp"
+  listen_port      = 50000
+  destination_port = 50000
+}
+
+# loadbalance mayastor
+resource "hcloud_load_balancer_service" "controlplane_load_balancer_service_mayastor" {
+  load_balancer_id = hcloud_load_balancer.controlplane_load_balancer.id
+  protocol         = "tcp"
+  listen_port      = 30011
+  destination_port = 30011
+}
+
+# Talos
+# create the machine secrets
+resource "talos_machine_secrets" "this" {
+  talos_version = var.talos_version_contract
+}
+
+# create the control plane and apply generated config in user_data
+resource "hcloud_server" "controlplane_server" {
+  name        = "talos-controlplane"
+  image       = var.image
+  server_type = var.controlplane_type
+  location    = var.location
+  labels      = { type = "talos-controlplane" }
+  user_data   = data.talos_machine_configuration.controlplane.machine_configuration
+  network {
+    network_id = hcloud_network.network.id
+    ip         = var.controlplane_ip
   }
-} 
+  depends_on = [
+    hcloud_network_subnet.subnet,
+    hcloud_load_balancer.controlplane_load_balancer,
+    talos_machine_secrets.this,
+  ]
+}
+
+# bootstrap the cluster
+resource "talos_machine_bootstrap" "bootstrap" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoint             = hcloud_server.controlplane_server.ipv4_address
+  node                 = hcloud_server.controlplane_server.ipv4_address
+}
+
+# create the worker and apply the generated config in user_data
+resource "hcloud_server" "worker_server" {
+  for_each    = var.workers
+  name        = each.value.name
+  image       = var.image
+  server_type = each.value.server_type
+  location    = each.value.location
+  labels      = { type = "talos-worker" }
+  user_data   = data.talos_machine_configuration.worker.machine_configuration
+  network {
+    network_id = hcloud_network.network.id
+  }
+  depends_on = [
+    hcloud_network_subnet.subnet,
+    hcloud_load_balancer.controlplane_load_balancer,
+  ]
+}
+
+# create the extra ssd volumes and attach them to the worker
+resource "hcloud_volume" "volumes" {
+  for_each  = hcloud_server.worker_server
+  name      = "${each.value.name}-volume"
+  size      = var.worker_extra_volume_size
+  server_id = each.value.id
+  depends_on = [
+    hcloud_server.worker_server
+  ]
+}
+
+# kubeconfig
+resource "talos_cluster_kubeconfig" "this" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = hcloud_server.controlplane_server.ipv4_address
+}
