@@ -43,7 +43,7 @@ variable "kubernetes_version" {
 variable "location" {
   description = "Hetzner datacenter location"
   type        = string
-  default     = "nbg1" # Nuremberg, Germany
+  default     = "fsn1" # Nuremberg, Germany
 }
 
 variable "network_zone" {
@@ -71,7 +71,7 @@ variable "image" {
 variable "snapshot_id" {
   description = "ID of the Hetzner snapshot to use"
   type        = string
-  default     = "237425437"
+  default     = "241639771"
 }
 
 # =============================================================================
