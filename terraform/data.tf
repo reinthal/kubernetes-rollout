@@ -14,7 +14,8 @@ data "talos_machine_configuration" "controlplane" {
     templatefile("${path.module}/templates/controlplanepatch.yaml.tmpl", {
       loadbalancerip = hcloud_load_balancer.controlplane_load_balancer.ipv4, 
       subnet = var.private_network_subnet_range
-    })
+    }),
+    templatefile("${path.module}/templates/hcloud-managerpatch.yaml.tmpl", {})
   ]
   depends_on = [
     hcloud_load_balancer.controlplane_load_balancer
@@ -32,7 +33,8 @@ data "talos_machine_configuration" "worker" {
   config_patches = [
     templatefile("${path.module}/templates/workerpatch.yaml.tmpl", {
       subnet = var.private_network_subnet_range
-    })
+    }),
+    templatefile("${path.module}/templates/hcloud-managerpatch.yaml.tmpl", {})
   ]
   depends_on = [
     hcloud_load_balancer.controlplane_load_balancer
