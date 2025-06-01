@@ -8,7 +8,7 @@ packer {
 }
 
 locals {
-  image = "hcloud-amd64-omni-reinthal-v1.9.5.raw.xz"
+  image = "hcloud-amd64-omni-reinthal-v1.10.1.raw.xz"
 }
 
 source "hcloud" "talos" {
