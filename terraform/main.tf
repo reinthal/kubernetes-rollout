@@ -124,3 +124,142 @@ resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = hcloud_server.controlplane_server.ipv4_address
 }
+
+resource "kubernetes_secret" "hcloud_token" {
+  metadata {
+    name      = "hcloud-token"
+    namespace = "kube-system"
+  }
+
+  data = {
+    token = var.hetzner_api_key
+  }
+  
+  type = "Opaque"
+
+  depends_on = [
+    null_resource.wait_for_kubernetes,
+    talos_machine_bootstrap.bootstrap
+  ]
+}
+
+resource "kubernetes_deployment" "hcloud_ccm" {
+  metadata {
+    name      = "hcloud-cloud-controller-manager"
+    namespace = "kube-system"
+  }
+
+  spec {
+    selector {
+      match_labels = {
+        app = "hcloud-cloud-controller-manager"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "hcloud-cloud-controller-manager"
+        }
+      }
+
+      spec {
+        service_account_name = "cloud-controller-manager"
+        dns_policy          = "Default"
+        priority_class_name = "system-cluster-critical"
+        
+        container {
+          name  = "hcloud-cloud-controller-manager"
+          image = "hetznercloud/hcloud-cloud-controller-manager:v1.18.0"
+          
+          command = ["/bin/hcloud-cloud-controller-manager"]
+          args    = [
+            "--cloud-provider=hcloud",
+            "--leader-elect=true",
+            "--allow-untagged-cloud"
+          ]
+
+          env {
+            name = "NODE_NAME"
+            value_from {
+              field_ref {
+                field_path = "spec.nodeName"
+              }
+            }
+          }
+
+          env {
+            name = "HCLOUD_TOKEN"
+            value_from {
+              secret_key_ref {
+                name = "hcloud-token"
+                key  = "token"
+              }
+            }
+          }
+        }
+
+        toleration {
+          key    = "node.cloudprovider.kubernetes.io/uninitialized"
+          value  = "true"
+          effect = "NoSchedule"
+        }
+
+        toleration {
+          key    = "CriticalAddonsOnly"
+          operator = "Exists"
+        }
+
+        toleration {
+          key    = "node-role.kubernetes.io/master"
+          effect = "NoSchedule"
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    kubernetes_secret.hcloud_token,
+    talos_machine_bootstrap.bootstrap
+  ]
+}
+
+resource "null_resource" "create_talosconfig" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "${data.talos_client_configuration.this.talos_config}" > /tmp/talosconfig
+    EOT
+  }
+}
+
+resource "null_resource" "wait_for_kubernetes" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for Kubernetes API to be ready..."
+      
+      # Set talos config
+      export TALOSCONFIG=/tmp/talosconfig
+      
+      # Wait for all nodes to be ready
+      timeout 300 bash -c 'until talosctl --nodes ${hcloud_server.controlplane_server.ipv4_address} health --server=false; do sleep 10; done'
+      
+      # Wait for Kubernetes API to respond and get kubeconfig
+      timeout 300 bash -c 'until talosctl --nodes ${hcloud_server.controlplane_server.ipv4_address} kubeconfig; do sleep 10; done'
+      
+      # Ensure kubeconfig is updated
+      talosctl --nodes ${hcloud_server.controlplane_server.ipv4_address} kubeconfig --force
+      
+      # Clean up temporary talos config
+      rm -f /tmp/talosconfig
+      
+      echo "Kubernetes cluster is ready!"
+    EOT
+  }
+
+  depends_on = [
+    null_resource.create_talosconfig,
+    talos_machine_bootstrap.bootstrap,
+    hcloud_server.worker_server,
+    data.talos_client_configuration.this
+  ]
+}
