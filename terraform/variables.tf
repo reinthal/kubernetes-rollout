@@ -5,6 +5,7 @@ variable "hetzner_api_key" {
 # Talos specific variables
 variable "image_id" {
   type = string
+  default = "241897526"
 }
 
 variable "cluster_name" {
