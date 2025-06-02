@@ -1,3 +1,5 @@
+# hcloud.pkr.hcl
+
 packer {
   required_plugins {
     hcloud = {
@@ -7,30 +9,37 @@ packer {
   }
 }
 
+variable "talos_version" {
+  type    = string
+  default = "v1.10.3"
+}
+
 locals {
-  image = "hcloud-amd64-omni-reinthal-v1.10.1.raw.xz"
+  image = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/initramfs-amd64.xz"
 }
 
 source "hcloud" "talos" {
   rescue       = "linux64"
-  image        = "debian-11"
+  image        = "debian-12"
   location     = "fsn1"
   server_type  = "cx22"
   ssh_username = "root"
 
-  snapshot_name = "Omni Image"
+  snapshot_name = "talos system disk ${var.talos_version}"
+  snapshot_labels = {
+    type    = "infra",
+    os      = "talos",
+    version = "${var.talos_version}",
+  }
 }
 
 build {
   sources = ["source.hcloud.talos"]
 
-  provisioner "file" {
-    source = "${local.image}"
-    destination = "/tmp/talos.raw.xz"
-  }
-
   provisioner "shell" {
     inline = [
+      "apt-get install -y wget",
+      "wget -O /tmp/talos.raw.xz ${local.image}",
       "xz -d -c /tmp/talos.raw.xz | dd of=/dev/sda && sync",
     ]
   }

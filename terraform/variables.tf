@@ -27,7 +27,7 @@ variable "cluster_name" {
 variable "talos_version_contract" {
   description = "Talos API version to use for the cluster, if not set the version shipped with the talos sdk version will be used"
   type        = string
-  default     = "v1.6"
+  default     = "v1.10.3"
 }
 
 variable "kubernetes_version" {
@@ -71,7 +71,7 @@ variable "image" {
 variable "snapshot_id" {
   description = "ID of the Hetzner snapshot to use"
   type        = string
-  default     = "241639771"
+  default     = "241853445"
 }
 
 # =============================================================================
@@ -149,5 +149,5 @@ variable "tailscale_authkey" {
 variable "tailscale_extra_args" {
   description = "Additional arguments for Tailscale startup"
   type        = string
-  default     = "--ssh"  # Enable SSH server by default
+  default     = "--ssh" # Enable SSH server by default
 } 
