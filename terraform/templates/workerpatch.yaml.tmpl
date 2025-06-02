@@ -1,7 +1,3 @@
-# patch.yaml
-cluster:
-  externalCloudProvider:
-    enabled: true
 machine:
   kubelet:
     # OpenEBS Mayastor
@@ -13,14 +9,6 @@ machine:
       - rw
       source: /var/openebs/local
       type: bind
-    # Hetzner CSI mount
-    - destination: /run/csi
-      type: bind
-      source: /var/lib/kubelet/plugins/csi.hetzner.cloud
-      options:
-      - bind
-      - rshared
-      - rw
     extraArgs:
       node-labels: openebs.io/engine=mayastor
     nodeIP:

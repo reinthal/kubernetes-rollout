@@ -148,6 +148,7 @@ resource "hcloud_server" "worker_server" {
   user_data   = data.talos_machine_configuration.worker.machine_configuration
   network {
     network_id = hcloud_network.network.id
+    ip         = each.value.ip
   }
   depends_on = [
     hcloud_network_subnet.subnet,
