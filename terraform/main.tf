@@ -84,12 +84,7 @@ resource "hcloud_server" "controlplane_server" {
   ]
 }
 
-# bootstrap the cluster
-resource "talos_machine_bootstrap" "bootstrap" {
-  client_configuration = talos_machine_secrets.this.client_configuration
-  endpoint             = hcloud_server.controlplane_server.ipv4_address
-  node                 = hcloud_server.controlplane_server.ipv4_address
-}
+
 
 # create the worker and apply the generated config in user_data
 resource "hcloud_server" "worker_server" {
@@ -121,10 +116,17 @@ resource "hcloud_volume" "volumes" {
   ]
 }
 
+# bootstrap the cluster
+resource "talos_machine_bootstrap" "bootstrap" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoint             = hcloud_load_balancer.controlplane_load_balancer.ipv4
+  node                 = hcloud_server.controlplane_server.name
+}
+
 # kubeconfig
 resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
-  node                 = hcloud_server.controlplane_server.ipv4_address
+  node                 = hcloud_load_balancer.controlplane_load_balancer.ipv4
 }
 
 # resource "kubernetes_secret" "hcloud_token" {
