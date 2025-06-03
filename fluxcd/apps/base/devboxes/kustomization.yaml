@@ -4,3 +4,4 @@ namespace: devboxes
 resources:
   - devboxes.yaml
   - namespace.yaml
+  - secrets.yaml

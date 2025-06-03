@@ -1,11 +1,14 @@
-{ pkgs, lib, config, inputs, ... }:
-
 {
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}: {
   env.GREET = "devenv";
-  
 
-  packages = with pkgs; [ 
-    git 
+  packages = with pkgs; [
+    git
     terraform
     packer
     sops
@@ -23,7 +26,7 @@
     k9s
     jq
     curl
+    gnupg
+    sops
   ];
-
-
 }
