@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - ingress-nginx.yaml
-  - hetzner-csi.yaml
+  - openebs-csi.yaml

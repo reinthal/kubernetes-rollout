@@ -1,7 +1,15 @@
 machine:
   kubelet:
-    # OpenEBS Mayastor
     extraMounts:
+      # Hetzner CSI mount
+    - destination: /run/csi
+      type: bind
+      source: /var/lib/kubelet/plugins/csi.hetzner.cloud
+      options:
+      - bind
+      - rshared
+      - rw
+    # OpenEBS Mayastor
     - destination: /var/openebs/local
       options:
       - bind
