@@ -71,7 +71,7 @@ spec:
   template:
     spec:
       labels:
-        - self-hosted-linux
+        - k8s-runner
       image: "summerwind/actions-runner:ubuntu-20.04"
       repository: "reinthal/template" 
       githubToken:
