@@ -55,3 +55,22 @@ spec:
 
     githubWebhookServer:
       enabled: false
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  annotations:
+    karpenter.sh/do-not-evict: "true"
+  name: self-hosted-runner-deployment
+  namespace: actions
+spec:
+  template:
+    Spec:
+      labels:
+        - self-hosted-linux
+      image: "summerwind/actions-runner:ubuntu-20.04"
+      organization: reinthal
+      resources:
+        requests:
+          cpu: 2000m
+          memory: 2000Mi
