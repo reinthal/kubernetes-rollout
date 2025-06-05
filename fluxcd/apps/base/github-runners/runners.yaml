@@ -7,6 +7,18 @@ metadata:
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/audit: privileged
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: github-cache-pvc
+  namespace: actions
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -78,3 +90,12 @@ spec:
         requests:
           cpu: 2000m
           memory: 2000Mi
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: github-cache-pvc
+      containers:
+        - name: runner
+          volumeMounts:
+            - mountPath: /cache
+              name: cache-volume
