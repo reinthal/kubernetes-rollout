@@ -61,7 +61,7 @@ jobs:
 
       - name: Load image into Docker
         run: |
-          docker load < result
+          docker load < nix-container/result
 
       - name: Show loaded images
         run: docker images
