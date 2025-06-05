@@ -74,10 +74,6 @@ spec:
         - k8s-runner
       image: "summerwind/actions-runner:ubuntu-20.04"
       repository: "reinthal/template" 
-      githubToken:
-        secretRef:
-          name: controller-manager
-          key: github_pat
       resources:
         requests:
           cpu: 2000m
