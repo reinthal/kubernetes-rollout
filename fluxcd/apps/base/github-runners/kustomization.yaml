@@ -3,4 +3,3 @@ kind: Kustomization
 namespace: github-runners
 resources:
   - runners.yaml
-  - namespace.yaml
