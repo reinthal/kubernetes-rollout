@@ -7,19 +7,6 @@ metadata:
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/audit: privileged
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: github-cache-pvc
-  namespace: github-runners
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 15Gi 
-  storageClassName: openebs-single-replica
----
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
