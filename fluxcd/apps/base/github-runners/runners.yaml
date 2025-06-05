@@ -10,7 +10,7 @@ metadata:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: github-cache-pvc
+  name: github-cache-fixed-pvc
   namespace: github-runners
 spec:
   accessModes:
@@ -94,7 +94,7 @@ spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: github-cache-pvc
+            claimName: github-cache-fixed-pvc
       containers:
         - name: runner
           volumeMounts:
