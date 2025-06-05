@@ -65,7 +65,7 @@ metadata:
   namespace: actions
 spec:
   template:
-    Spec:
+    spec:
       labels:
         - self-hosted-linux
       image: "summerwind/actions-runner:ubuntu-20.04"
