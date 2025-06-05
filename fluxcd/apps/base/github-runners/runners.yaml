@@ -69,7 +69,7 @@ spec:
       labels:
         - self-hosted-linux
       image: "summerwind/actions-runner:ubuntu-20.04"
-      organization: reinthal
+      repository: "reinthal/template" 
       resources:
         requests:
           cpu: 2000m
