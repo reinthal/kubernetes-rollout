@@ -18,7 +18,7 @@ spec:
   resources:
     requests:
       storage: 15Gi 
-  storageClassName: openebs-hostpath
+  storageClassName: openebs-hostpath-path
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
