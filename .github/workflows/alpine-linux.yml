@@ -73,15 +73,19 @@ jobs:
           
           # Tag for all the required formats
           for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
-            echo "Tagging $IMAGE_ID as $tag"
-            docker tag "$IMAGE_ID" "$tag"
+            if [ -n "$tag" ]; then  # Skip empty lines
+                echo "Tagging $IMAGE_ID as $tag"
+                docker tag "$IMAGE_ID" "$tag"
+              fi
           done
 
       - name: Push Docker image
         run: |
-          for tag in ${{ steps.meta.outputs.tags }}; do
-            echo "Pushing $tag"
-            docker push "$tag"
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
+            if [ -n "$tag" ]; then  # Skip empty lines
+                echo "Pushing $tag"
+                docker push "$tag"
+              fi
           done
 
       - name: Display image digest
