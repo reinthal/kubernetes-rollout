@@ -1,0 +1,39 @@
+FROM summerwind/actions-runner:ubuntu-22.04
+
+USER root
+
+# Install dependencies required for Nix
+RUN apt-get update && apt-get install -y \
+    curl \
+    xz-utils \
+    sudo \
+    gnupg2 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create necessary directories with correct permissions
+RUN mkdir -p /nix && chown runner:runner /nix
+
+# Install Nix as the runner user
+USER runner
+RUN curl -L https://nixos.org/nix/install | sh
+
+# Add Nix to PATH in the user's profile
+RUN echo '. $HOME/.nix-profile/etc/profile.d/nix.sh' >> $HOME/.bashrc
+
+# Enable flakes and nix-command experimental features
+RUN mkdir -p $HOME/.config/nix && \
+    echo "experimental-features = nix-command flakes" > $HOME/.config/nix/nix.conf
+
+
+
+# Switch back to runner user for GitHub Actions to work properly
+USER runner
+
+# Set environment variable to ensure Nix is available in path
+ENV PATH="${PATH}:/home/runner/.nix-profile/bin"
+RUN  nix profile install nixpkgs#direnv nixpkgs#gh
+# Add direnv hook to bashrc
+RUN echo 'eval "$(direnv hook bash)"' >> $HOME/.bashrc
+# Cache the template devshell in image
+RUN  nix develop github:reinthal/template

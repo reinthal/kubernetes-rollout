@@ -4,8 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
-    template.url = "github:reinthal/template";
-    template.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, flake-utils, template }:
@@ -74,37 +72,6 @@
             };
           };
 
-          action-runner-nix = pkgs.dockerTools.buildLayeredImage {
-            name = "action-runner-nix";
-            tag = "v2.325.0-ubuntu-22.04";
-            
-            # Use summerwind/ubuntu-22.04 as the base image
-            fromImage = pkgs.dockerTools.pullImage {
-              imageName = "summerwind/actions-runner";
-              imageDigest = "sha256:bcc6662430de0b560c7658a0c664231efdaf6a8e4c06d2e4b1cbea131d96bd2b";
-              sha256 = "sha256-2o9BucepJNZffcA4y6+ge0EyyNITKxhUFdVhPrMyCfY="; 
-              finalImageTag = "v2.325.0-ubuntu-22.04";
-              finalImageName = "summerwind/actions-runner";
-            };
-            
-            contents = basePackages ++ [ pkgs.direnv pkgs.gh pkgs.git-lfs ] ++ templateDevShellPackages;
-            extraCommands = baseExtraCommands;
-            config = {
-              Cmd = [ "/bin/bash" ];
-              WorkingDir = "/";
-              Env = [
-                "NIX_PATH=nixpkgs=${nixpkgs}"
-                "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-                "PATH=/bin:/usr/bin:/nix/var/nix/profiles/default/bin"
-                "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-              ];
-              Volumes = {
-                "/nix/store" = {};
-                "/nix/var/nix/db" = {};
-              };
-            };
-          };
-          
           default = self.packages.${system}.alpine-nix;
         };
       }
