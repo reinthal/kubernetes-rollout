@@ -4,9 +4,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
+    template.url = "github:reinthal/template";
+    template.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, template }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -38,6 +40,8 @@
           gzip
           xz
         ];
+        # Get the devshell packages from the template
+        templateDevShellPackages = template.devShells.${system}.default.buildInputs;
       in
       {
         packages = {
@@ -83,7 +87,7 @@
               finalImageName = "summerwind/actions-runner";
             };
             
-            contents = basePackages;
+            contents = basePackages ++ [ pkgs.direnv pkgs.gh pkgs.git-lfs ] ++ templateDevShellPackages;
             extraCommands = baseExtraCommands;
             config = {
               Cmd = [ "/bin/bash" ];
