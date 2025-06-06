@@ -72,7 +72,7 @@ jobs:
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "alpine-nix" | head -n 1)
           
           # Tag for all the required formats
-          for tag in ${{ steps.meta.outputs.tags }}; do
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
             echo "Tagging $IMAGE_ID as $tag"
             docker tag "$IMAGE_ID" "$tag"
           done
