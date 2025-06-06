@@ -69,7 +69,7 @@ jobs:
       - name: Tag Docker image
         run: |
           # Extract the tag created by Nix from the loaded images
-          IMAGE_NAME="alpine-container" # Image name from the nix-container/flake.nix
+          IMAGE_NAME="alpine-nix" # Image name from the nix-container/flake.nix
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep $IMAGE_NAME | head -n 1)
           
           # Tag for all the required formats
