@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
-
+      # Needed to build the container
       - name: Setup Nix
         uses: cachix/install-nix-action@v30
         with:
@@ -69,12 +69,13 @@ jobs:
       - name: Tag Docker image
         run: |
           # Extract the tag created by Nix from the loaded images
-          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "alpine-nix" | head -n 1)
+          IMAGE_NAME="alpine-container" # Image name from the nix-container/flake.nix
+          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep $IMAGE_NAME | head -n 1)
           
           # Tag for all the required formats
           for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
             if [ -n "$tag" ]; then  # Skip empty lines
-                echo "Tagging $IMAGE_ID as $tag"
+                echo "Tagging  - $IMAGE_ID - as  - $tag -"
                 docker tag "$IMAGE_ID" "$tag"
               fi
           done
