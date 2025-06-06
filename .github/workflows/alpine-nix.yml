@@ -1,0 +1,95 @@
+name: Build and Publish Alpine Nix Container
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'nix-container/flake.nix'
+      - 'nix-container/flake.lock'
+      - '.github/workflows/alpine-nix.yml'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-and-push:
+    name: Build and push container
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      # Needed to build the container
+      - name: Setup Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/reinthal/kubernetes-rollout/alpine-nix
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+
+      - name: Build container with Nix
+        run: |
+          cd nix-container
+          nix build .#default --print-build-logs
+          # Verify the build worked
+          if [ ! -e result ]; then
+            echo "Nix build failed"
+            exit 1
+          fi
+
+      - name: Load image into Docker
+        run: |
+          docker load < nix-container/result
+
+      - name: Show loaded images
+        run: docker images
+
+      - name: Tag Docker image
+        run: |
+          # Extract the tag created by Nix from the loaded images
+          IMAGE_NAME="alpine-nix" # Image name from the nix-container/flake.nix
+          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep $IMAGE_NAME | head -n 1)
+          
+          # Tag for all the required formats
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
+            if [ -n "$tag" ]; then  # Skip empty lines
+                echo "Tagging  - $IMAGE_ID - as  - $tag -"
+                docker tag "$IMAGE_ID" "$tag"
+              fi
+          done
+
+      - name: Push Docker image
+        run: |
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
+            if [ -n "$tag" ]; then  # Skip empty lines
+                echo "Pushing $tag"
+                docker push "$tag"
+              fi
+          done
+
+      - name: Display image digest
+        run: |
+          echo "Image digest: ${{ steps.meta.outputs.digest }}"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
