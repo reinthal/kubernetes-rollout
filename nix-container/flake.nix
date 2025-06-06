@@ -33,7 +33,7 @@
               git
               gh
               direnv
-              nix-serve
+              nix-serve-ng
               nix
               cacert
               bash
