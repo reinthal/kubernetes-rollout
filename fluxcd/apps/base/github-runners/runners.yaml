@@ -59,7 +59,7 @@ spec:
 
     image:
       repository: "summerwind/actions-runner-controller"
-      actionsRunnerRepositoryAndTag: "summerwind/actions-runner:ubuntu-20.04"
+      actionsRunnerRepositoryAndTag: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
       dindSidecarRepositoryAndTag: "docker:dind"
       pullPolicy: IfNotPresent
 
@@ -85,7 +85,7 @@ spec:
     spec:
       labels:
         - k8s-runner
-      image: "summerwind/actions-runner:ubuntu-20.04"
+      image: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
       repository: "reinthal/template" 
       resources:
         requests:
