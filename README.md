@@ -34,33 +34,56 @@ In Kubernetes we have
 
 ### Terraform Configuration
 
-The infrastructure is provisioned using Terraform with the following key components:
+The infrastructure is provisioned using the following command:
 
-```hcl
-# Server provisioning
-resource "hcloud_server" "omni_nodes" {
-  count       = 3
-  name        = "omni-node-${count.index + 1}"
-  server_type = var.server_type
-  image       = var.snapshot_id
-  location    = var.location
-  ssh_keys    = [hcloud_ssh_key.default.id]
-  
-  labels = {
-    role = count.index == 0 ? "control-plane" : "worker"
+
+Up:
+
+```
+echo yes | terraform apply -var-file="workers.tfvars"
+```
+
+Down:
+
+```
+echo yes | terraform destroy -var-file="workers.tfvars"
+```
+
+Current worker config:
+
+```
+workers = {
+  1 = {
+    server_type = "cpx41",
+    name        = "talos-worker-1",
+    location    = "nbg1",
+    ip          = "10.0.0.4",
+    labels      = { "type" : "talos-worker" },
+    taints      = [],
+  },
+  2 = {
+    server_type = "cpx41",
+    name        = "talos-worker-2",
+    location    = "nbg1",
+    ip          = "10.0.0.5",
+    labels      = { "type" : "talos-worker" },
+    taints      = [],
+  },
+  3 = {
+    server_type = "cpx41",
+    name        = "talos-worker-3",
+    location    = "nbg1",
+    ip          = "10.0.0.6",
+    labels      = { "type" : "talos-worker" },
+    taints      = [],
   }
-}
-
-# Network configuration
-resource "hcloud_network" "omni_network" {
-  name     = "omni-network"
-  ip_range = "10.0.0.0/16"
 }
 ```
 
+
 ### Talos OS Configuration
 
-Talos OS is deployed using a custom Omni Image snapshot in Hetzner Cloud. The image was created with Packer to ensure consistency and repeatability.
+Talos OS is deployed using a custom image snapshot in Hetzner Cloud. The image was created with Packer as described in the Talos guidelines.
 
 ## Continuous Delivery
 
@@ -125,17 +148,18 @@ The development environment includes:
 ## Current Status
 
 ### Completed
+
+- Github Action Runner + Controller
+- Persistent storage with OpenEbs
 - Basic infrastructure provisioning with Terraform
 - Kubernetes cluster creation with Talos OS
 - Initial FluxCD setup for GitOps
-- Tailscale integration for secure networking
 
 ### Known Issues
-1. Hetzner CSI provider has compatibility issues with Talos OS
-2. Developer box storage provisioning needs further investigation
 
 ## Planned Features
 
+0. Developer box storage provisioning needs further investigation
 1. Deploy HAP-CTF HTTP API with HPA autoscaling
 2. Provision developer boxes with Tailscale SSH access
 3. Implement monitoring with Prometheus and Grafana
