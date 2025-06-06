@@ -1,75 +1,139 @@
-# Baseline
+# Kubernetes Infrastructure on Talos OS
 
-- [ ] Kubernetes on Talos OS / Sidero Omni
-- [ ] Devboxes that can run nix hello
+A Kubernetes infrastructure deployment built on Talos OS using Sidero Omni, provisioned on Hetzner Cloud with GitOps using FluxCD.
 
-# Application deployment
+## Project Overview
 
-- [ ] run https://github.com/palisaderesearch/hap-ctf container with HPA
-      autoscaling
+This project implements a production-ready Kubernetes cluster with the following components:
+- **Cloud Provider**: Hetzner Cloud (EU Central - Frankfurt)
+- **Operating System**: Talos OS
+- **Infrastructure**: 3 VPS instances (1 control plane, 3 workers)
+- **GitOps**: FluxCD for continuous delivery
+- **Development**: Nix-based development environment
+- **
 
-# Stretch: reliability
+## Architecture
 
+### Infrastructure Components
 
-[ x  x  x  x  x  x  x  >  0  0  0  0  0  0  0  0]
+**Kubernetes Cluster**
+- 1 Control Plane Node
+- 3 Worker Nodes
+- Latest stable Kubernetes version
 
-Open-ended stretch: reliability
+**Development Environment**
+- Nix-based dependency management
+- Automated environment setup with direnv/devenv
+- All necessary tools pre-configured
 
-7. Implement basic monitoring with Prometheus and Grafana
-8. Configure automated alerts for critical system metrics
-9. Set up a backup strategy for critical components
+## Infrastructure as Code
 
-# summary of tasks
+### Terraform Configuration
 
-1. Provision 3 Omni nodes on Hetzner Cloud. Use Terraform.
+The infrastructure is provisioned using Terraform with the following key components:
+
+```hcl
+# Server provisioning
+resource "hcloud_server" "omni_nodes" {
+  count       = 3
+  name        = "omni-node-${count.index + 1}"
+  server_type = var.server_type
+  image       = var.snapshot_id
+  location    = var.location
+  ssh_keys    = [hcloud_ssh_key.default.id]
+  
+  labels = {
+    role = count.index == 0 ? "control-plane" : "worker"
+  }
+}
+
+# Network configuration
+resource "hcloud_network" "omni_network" {
+  name     = "omni-network"
+  ip_range = "10.0.0.0/16"
+}
+```
+
+### Talos OS Configuration
+
+Talos OS is deployed using a custom Omni Image snapshot in Hetzner Cloud. The image was created with Packer to ensure consistency and repeatability.
+
+## Continuous Delivery
+
+### FluxCD Setup
+
+GitOps implementation using FluxCD with the following structure:
 
 ```
-Build 'hcloud.talos' finished after 4 minutes 27 seconds.
-
-==> Wait completed after 4 minutes 27 seconds
-
-==> Builds finished. The artifacts of successful builds are:
---> hcloud.talos: A snapshot was created: 'Omni Image' (ID: 237425437)
+fluxcd/
+├── apps/           # Application deployments
+├── clusters/       # Cluster-specific configuration
+├── helm-values/    # Helm chart values
+├── infrastructure/ # Infrastructure components
+└── scripts/        # Utility scripts
 ```
 
-2. Provision a Kubernetes cluster with 1 control node and 2 workers
-3. Provision developer boxes
-4. Set up access to dev boxes with Tailscale SSH bonus: set up GitOps for
-   Terraform and Tailscale
+FluxCD is bootstrapped to connect to the GitHub repository:
 
-5. Deploy HAP-CTF HTTP API and expose it with cloudflared
-6. Set up continuous delivery for HAP-CTF bonus: set up auto updates for
-   developer box image
+```bash
+flux bootstrap github \
+    --context=talos-default \
+    --owner=${GITHUB_USER} \
+    --repository=${GITHUB_REPO} \
+    --branch=main \
+    --personal \
+    --path=fluxcd/clusters/production
+```
 
-7. Implement basic monitoring with Prometheus and Grafana
-8. Configure automated alerts for critical system metrics
-9. Set up a backup strategy for critical components
+## Development Environment
 
-# Baseline (7 Pomodoros)
+### Prerequisites
 
-- [x] Provision 3 Omni nodes with Terraform: 2 Pomodoros (50 min)
-- [x] Add tailscale to my own machine
-- [x] Configure Tailscale for my omni nodes
-- [x] Provision Kubernetes cluster: 2 Pomodoros (50 min)
-- [x] authenticate to the cluster using kubectl and kubelogin
-![image](https://github.com/user-attachments/assets/a02c5ba7-606e-47b8-b1b4-b94f7b858645)
+- Nix package manager
+- direnv
 
-- [x] set fluxcd
-- [ ] Provision developer boxes: 2 Pomodoros (50 min)
-- [ ] Set up Tailscale SSH access: 1 Pomodoro (25 min)
+### Setup
 
-# Expansion (4 Pomodoros)
+1. Clone the repository
+2. Enter the directory (direnv will automatically load the environment)
+3. Run `direnv reload` to set up the shell environment
 
-- [ ] Deploy HAP-CTF HTTP API with cloudflared: 2 Pomodoros (50 min)
-- [ ] Set up continuous delivery: 2 Pomodoros (50 min)
+### Available Tools
 
-- [ ] Stretch Goals (4 Pomodoros)
+The development environment includes:
+- `terraform` - Infrastructure provisioning
+- `kubectl` - Kubernetes CLI
+- `talosctl` - Talos OS CLI
+- `omnictl` - Sidero Omni CLI
+- `flux` - FluxCD CLI
+- `hcloud` - Hetzner Cloud CLI
+- `k9s` - Kubernetes dashboard
+- `sops` - Secrets management
 
-- [ ] Implement Prometheus and Grafana: 2 Pomodoros (50 min)
-- [ ] Configure automated alerts: 1 Pomodoro (25 min)
-- [ ] Set up backup strategy: 1 Pomodoro (25 min)
+## Directory Structure
 
-# Buffer (1 Pomodoro)
+- `terraform/` - Infrastructure as Code configurations
+- `fluxcd/` - GitOps configurations and Kubernetes manifests
+- `nix-container/` - Container build configurations
+- `secrets/` - Encrypted secrets and configuration
+- `.github/` - CI/CD workflows
 
-- [ ] patch devenv.nix to include the oidc-login plugin
-- Troubleshooting/unexpected issues: 1 Pomodoro (25 min)
+## Current Status
+
+### Completed
+- Basic infrastructure provisioning with Terraform
+- Kubernetes cluster creation with Talos OS
+- Initial FluxCD setup for GitOps
+- Tailscale integration for secure networking
+
+### Known Issues
+1. Hetzner CSI provider has compatibility issues with Talos OS
+2. Developer box storage provisioning needs further investigation
+
+## Planned Features
+
+1. Deploy HAP-CTF HTTP API with HPA autoscaling
+2. Provision developer boxes with Tailscale SSH access
+3. Implement monitoring with Prometheus and Grafana
+4. Configure automated alerts for critical system metrics
+5. Set up backup strategy for critical components

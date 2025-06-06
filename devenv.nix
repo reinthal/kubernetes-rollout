@@ -27,6 +27,5 @@
     jq
     curl
     gnupg
-    sops
   ];
 }
