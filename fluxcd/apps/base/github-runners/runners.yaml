@@ -99,3 +99,40 @@ spec:
     githubWebhookServer:
       enabled: false
 ---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  annotations:
+    karpenter.sh/do-not-evict: "true"
+  name: self-hosted-runner-deployment
+  namespace: actions
+spec:
+  template:
+    spec:
+      labels:
+        - k8s-runner
+      image: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
+      repository: "reinthal/template" 
+      resources:
+        requests:
+          cpu: 2000m
+          memory: 2000Mi
+      volumes:
+        - name: cache-volume
+          persistentVolumeClaim:
+            claimName: github-cache-fixed-pvc
+        - name: nix-store
+          persistentVolumeClaim:
+            claimName: nix-store-pvc
+        - name: nix-var
+          persistentVolumeClaim:
+            claimName: nix-var-pvc
+      containers:
+        - name: runner
+          volumeMounts:
+            - mountPath: /cache
+              name: cache-volume
+            - mountPath: /nix
+              name: nix-store
+            - mountPath: /home/runner/.nix-profile
+              name: nix-var
