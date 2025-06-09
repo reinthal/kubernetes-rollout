@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+When editing or reviewing FluxCD HelmRelease resources, always consider the corresponding values files in the `fluxcd/helm-values/` directory. 
+
+**Key relationships to understand:**
+- HelmRelease resources often reference external values files for complex configurations
+- Values files in `fluxcd/helm-values/` contain the detailed configuration for specific applications
+- The `spec.values` section in HelmRelease may reference or should be cross-referenced with these external files
+- Common values files include:
+  - `actions-runner-controller.yaml` - for GitHub Actions runner configurations
+  - `openebs-csi.yaml` - for OpenEBS storage configurations
+  - `hcloud-csi.yaml` - for Hetzner Cloud CSI configurations
+  - `tailscale-operator-values.yaml` - for Tailscale operator settings
+
+**When working with HelmReleases:**
+1. Check if there's a corresponding values file in `fluxcd/helm-values/`
+2. Ensure consistency between inline values and external values files
+3. Consider the impact of changes on both the HelmRelease and related values files
+4. Reference the values files when suggesting configuration changes or troubleshooting
+5. Suggest using external values files for complex configurations instead of large inline values sections
+
+**File naming patterns:**
+- Values files typically match the application name (e.g., `actions-runner-controller.yaml`)
+- Some may include suffixes like `-values.yaml` or `-config.yaml`
+- Always check for both exact matches and similar names when working with a HelmRelease
