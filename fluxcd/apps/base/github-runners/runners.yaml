@@ -86,6 +86,7 @@ spec:
     image:
       repository: "summerwind/actions-runner-controller"
       actionsRunnerRepositoryAndTag: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
+      dindSidecarRepositoryAndTag: "docker:dind"
       pullPolicy: IfNotPresent
 
     serviceAccount:
@@ -98,41 +99,3 @@ spec:
     githubWebhookServer:
       enabled: false
 ---
-apiVersion: actions.summerwind.dev/v1alpha1
-kind: RunnerDeployment
-metadata:
-  annotations:
-    karpenter.sh/do-not-evict: "true"
-  name: self-hosted-runner-deployment
-  namespace: actions
-spec:
-  template:
-    spec:
-      labels:
-        - k8s-runner
-      image: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
-      repository: "reinthal/template"
-      dockerdWithinRunnerContainer: false
-      resources:
-        requests:
-          cpu: 2000m
-          memory: 2000Mi
-      volumes:
-        - name: nix-store
-          persistentVolumeClaim:
-            claimName: nix-store-pvc
-        - name: nix-var
-          persistentVolumeClaim:
-            claimName: nix-var-pvc
-      containers:
-        - name: runner
-          volumeMounts:
-            - mountPath: /nix/store
-              name: nix-store
-            - mountPath: /nix/var
-              name: nix-var
-          env:
-            - name: PATH
-              value: "/home/runner/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$(PATH)"
-            - name: NIX_REMOTE
-              value: "daemon"
