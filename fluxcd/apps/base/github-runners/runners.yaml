@@ -7,45 +7,6 @@ metadata:
     pod-security.kubernetes.io/warn: privileged
     pod-security.kubernetes.io/audit: privileged
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: github-cache-fixed-pvc
-  namespace: github-runners
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 15Gi 
-  storageClassName: openebs-hostpath-fixed
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nix-store-pvc
-  namespace: github-runners
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi  # Nix store can get large
-  storageClassName: openebs-hostpath-fixed
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nix-var-pvc
-  namespace: github-runners
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi  # Nix daemon state and profiles
-  storageClassName: openebs-hostpath-fixed
----
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -105,34 +66,19 @@ metadata:
   annotations:
     karpenter.sh/do-not-evict: "true"
   name: self-hosted-runner-deployment
-  namespace: actions
+  namespace: github-runners
 spec:
+  replicas: 1
   template:
     spec:
       labels:
         - k8s-runner
       image: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
-      repository: "reinthal/template" 
+      repository: "reinthal/template"
+      dockerEnabled: false
+      dockerdWithinRunnerContainer: false
       resources:
         requests:
-          cpu: 2000m
-          memory: 2000Mi
-      volumes:
-        - name: cache-volume
-          persistentVolumeClaim:
-            claimName: github-cache-fixed-pvc
-        - name: nix-store
-          persistentVolumeClaim:
-            claimName: nix-store-pvc
-        - name: nix-var
-          persistentVolumeClaim:
-            claimName: nix-var-pvc
-      containers:
-        - name: runner
-          volumeMounts:
-            - mountPath: /cache
-              name: cache-volume
-            - mountPath: /nix
-              name: nix-store
-            - mountPath: /home/runner/.nix-profile
-              name: nix-var
+          cpu: 8000m
+          memory: 4Gi
+      volumes: []
