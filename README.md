@@ -54,7 +54,7 @@ Current worker config:
 ```
 workers = {
   1 = {
-    server_type = "cpx41",
+    server_type = "cpx51",
     name        = "talos-worker-1",
     location    = "nbg1",
     ip          = "10.0.0.4",
@@ -62,7 +62,7 @@ workers = {
     taints      = [],
   },
   2 = {
-    server_type = "cpx41",
+    server_type = "cpx51",
     name        = "talos-worker-2",
     location    = "nbg1",
     ip          = "10.0.0.5",
@@ -70,7 +70,7 @@ workers = {
     taints      = [],
   },
   3 = {
-    server_type = "cpx41",
+    server_type = "cpx51",
     name        = "talos-worker-3",
     location    = "nbg1",
     ip          = "10.0.0.6",
@@ -78,6 +78,7 @@ workers = {
     taints      = [],
   }
 }
+
 ```
 
 
@@ -95,7 +96,7 @@ GitOps implementation using FluxCD with the following structure:
 fluxcd/
 ├── apps/           # Application deployments
 ├── clusters/       # Cluster-specific configuration
-├── helm-values/    # Helm chart values
+├── helm-values/    # Helm chart values for reference reading
 ├── infrastructure/ # Infrastructure components
 └── scripts/        # Utility scripts
 ```
