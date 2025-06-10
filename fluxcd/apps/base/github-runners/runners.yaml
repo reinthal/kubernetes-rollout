@@ -68,7 +68,7 @@ metadata:
   name: self-hosted-runner-deployment
   namespace: github-runners
 spec:
-  replicas: 4
+  replicas: 3
   template:
     spec:
       labels:
