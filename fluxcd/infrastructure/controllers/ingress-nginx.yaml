@@ -35,6 +35,8 @@ spec:
     controller:
       service:
         type: "LoadBalancer"
+        annotations:
+          load-balancer.hetzner.cloud/network-zone: "eu-central"
         externalTrafficPolicy: "Local"
       config:
         use-forwarded-headers: "true"
