@@ -19,6 +19,7 @@
     fluxcd
     hcloud
     kubectl
+    kustomize
     krew
     kubelogin-oidc
     kubernetes-helm

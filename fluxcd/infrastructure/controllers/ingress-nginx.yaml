@@ -35,13 +35,9 @@ spec:
     controller:
       service:
         type: "LoadBalancer"
-        annotations:
-          load-balancer.hetzner.cloud/name: "worker-load-balancer"
-          load-balancer.hetzner.cloud/use-private-ip: "true"
         externalTrafficPolicy: "Local"
       config:
         use-forwarded-headers: "true"
         compute-full-forwarded-for: "true"
-        use-proxy-protocol: "true"
     admissionWebhooks:
       enabled: false

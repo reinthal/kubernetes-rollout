@@ -8,7 +8,3 @@ output "kubeconfig" {
   sensitive = true
 }
 
-output "worker_load_balancer_ip" {
-  value       = hcloud_load_balancer.worker_load_balancer.ipv4
-  description = "Public IP address of the worker load balancer for HTTPS traffic"
-}

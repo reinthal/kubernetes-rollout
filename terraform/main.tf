@@ -59,39 +59,6 @@ resource "hcloud_load_balancer_service" "controlplane_load_balancer_service_maya
   destination_port = 30011
 }
 
-# create the worker load balancer for internet traffic
-resource "hcloud_load_balancer" "worker_load_balancer" {
-  name               = "talos-worker-lb"
-  load_balancer_type = var.load_balancer_type
-  network_zone       = var.network_zone
-}
-
-# attach the worker load balancer to the private network
-resource "hcloud_load_balancer_network" "worker_srvnetwork" {
-  load_balancer_id = hcloud_load_balancer.worker_load_balancer.id
-  network_id       = hcloud_network.network.id
-}
-
-# configure HTTPS service for worker load balancer
-resource "hcloud_load_balancer_service" "worker_load_balancer_service_https" {
-  load_balancer_id = hcloud_load_balancer.worker_load_balancer.id
-  protocol         = "tcp"
-  listen_port      = 443
-  destination_port = 443
-}
-
-# add all worker nodes as targets for the worker load balancer
-resource "hcloud_load_balancer_target" "worker_load_balancer_target" {
-  for_each         = hcloud_server.worker_server
-  type             = "server"
-  load_balancer_id = hcloud_load_balancer.worker_load_balancer.id
-  server_id        = each.value.id
-  use_private_ip   = true
-  depends_on = [
-    hcloud_server.worker_server,
-    hcloud_load_balancer_network.worker_srvnetwork
-  ]
-}
 
 
 # Talos
