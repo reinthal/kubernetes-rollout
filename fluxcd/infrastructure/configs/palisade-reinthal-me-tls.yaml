@@ -7,7 +7,7 @@ metadata:
 spec:
   secretName: palisade-reinthal-me-tls
   issuerRef:
-    name: letsencrypt-cloudflare-staging
+    name: letsencrypt-cloudflare-prod
     kind: ClusterIssuer
   dnsNames:
     - "*.palisade.reinthal.me"
