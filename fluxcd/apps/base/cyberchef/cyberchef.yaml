@@ -3,12 +3,13 @@ kind: Namespace
 metadata:
   name: cyberchef
   labels:
-    toolkit.fluxcd.io/tenant: kog-team
+    toolkit.fluxcd.io/tenant: sre-team
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cyberchef-deployment
+  namespace: cyberchef
   labels:
     app: cyberchef
 spec:
@@ -26,13 +27,21 @@ spec:
         image: ghcr.io/gchq/cyberchef:latest
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: cyberchef-service
+  namespace: cyberchef
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
   - port: 8080
     targetPort: 80
