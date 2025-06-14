@@ -37,6 +37,7 @@ spec:
         type: "LoadBalancer"
         annotations:
           load-balancer.hetzner.cloud/network-zone: "eu-central"
+          load-balancer.hetzner.cloud/use-private-ip: "true"
         externalTrafficPolicy: "Local"
       config:
         use-forwarded-headers: "true"
