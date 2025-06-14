@@ -6,6 +6,10 @@ metadata:
   namespace: cert-manager
 spec:
   secretName: palisade-reinthal-me-tls
+  secretTemplate:
+      annotations:
+        reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+        reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
   issuerRef:
     name: letsencrypt-cloudflare-prod
     kind: ClusterIssuer
