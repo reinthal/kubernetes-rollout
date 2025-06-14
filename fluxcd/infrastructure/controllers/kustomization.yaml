@@ -5,3 +5,4 @@ resources:
   - hcloud-ccm.yaml
   - ingress-nginx.yaml
   - openebs.yaml
+  - reflector.yaml
