@@ -39,3 +39,32 @@ spec:
     networking:
       enabled: true
       clusterCIDR: "10.244.0.0/16"
+---
+# Node provider ID patches for Hetzner CCM integration
+apiVersion: v1
+kind: Node
+metadata:
+  name: talos-worker-1
+spec:
+  providerID: "hcloud://65736807"
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: talos-worker-2
+spec:
+  providerID: "hcloud://65736808"
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: talos-worker-3
+spec:
+  providerID: "hcloud://65736810"
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: talos-controlplane
+spec:
+  providerID: "hcloud://65736806"
