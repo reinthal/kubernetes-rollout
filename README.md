@@ -7,13 +7,15 @@ A Kubernetes infrastructure deployment built on Talos OS using Sidero Omni, prov
 This project implements a production-ready Kubernetes cluster with the following components:
 - **Cloud Provider**: Hetzner Cloud
 - **Operating System**: Talos OS
-- **Infrastructure**: 3 VPS instances (1 control plane, 3 workers)
+- **Infrastructure**: 4 VPS instances (1 control plane, 3 workers)
 - **GitOps**: FluxCD for continuous delivery
 - **Development**: Nix-based development environment
 
 In Kubernetes we have
 
-- **OpenEbs**: Persistent storage with OpenEbs
+- **OpenEbs**: Persistent fast local storage with OpenEbs (Possibly redundant)
+- **Hetzner CSI**: Hetzner Integrated Storage
+- **Cyberchef**: available at https://cyberchef.palisade.reinthal.me
 - **Github Actions**: Action Runner Controller and one RunnerDeployment using custom image pre-bundled nix dependencies.
 
 ## Architecture
