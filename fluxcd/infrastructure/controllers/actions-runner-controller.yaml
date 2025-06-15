@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: github-runners
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/audit: privileged
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: actions-runner-controller
+  namespace: github-runners
+spec:
+  interval: 24h
+  url: https://actions-runner-controller.github.io/actions-runner-controller
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: actions-runner-controller
+  namespace: github-runners
+spec:
+  interval: 24h
+  chart:
+    spec:
+      chart: actions-runner-controller
+      version: "0.23.7"
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: github-runners
+      interval: 24h
+  values:
+    replicaCount: 1
+    webhookPort: 9443
+    syncPeriod: 1m
+    defaultScaleDownDelay: 5m
+    enableLeaderElection: true
+
+    authSecret:
+      enabled: true
+      create: false
+      name: "controller-manager"
+
+    image:
+      repository: "summerwind/actions-runner-controller"
+      actionsRunnerRepositoryAndTag: "ghcr.io/reinthal/kubernetes-rollout/action-runner-nix:sha-2c3b0a1"
+      dindSidecarRepositoryAndTag: "docker:dind"
+      pullPolicy: IfNotPresent
+
+    serviceAccount:
+      create: true
+
+    certManagerEnabled: false
+
+    logFormat: text
+
+    githubWebhookServer:
+      enabled: false

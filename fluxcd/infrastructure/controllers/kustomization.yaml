@@ -6,3 +6,4 @@ resources:
   - ingress-nginx.yaml
   - openebs.yaml
   - reflector.yaml
+  - actions-runner-controller.yaml

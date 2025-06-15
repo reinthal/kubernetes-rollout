@@ -1,2 +1,3 @@
 hcloud-token.yaml
 hcloud-token-kube-system.yaml
+actions-runner-secrets.yaml

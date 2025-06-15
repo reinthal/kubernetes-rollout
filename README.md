@@ -158,6 +158,17 @@ The development environment includes:
 
 ### Known Issues
 
+### DNS Configuration
+
+When deploying applications with ingress resources, you need to manually update your DNS records to point to the load balancer's external IP address.
+
+To get the current load balancer IP:
+```bash
+kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+```
+
+Update your DNS A records to point to this IP address. The cert-manager will automatically issue Let's Encrypt certificates once DNS propagation is complete.
+
 ## Planned Features
 
 0. Developer box storage provisioning needs further investigation
