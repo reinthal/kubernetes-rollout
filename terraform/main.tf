@@ -178,7 +178,8 @@ resource "talos_cluster_kubeconfig" "this" {
 # wait for talos controlplane health before continuing
 resource "null_resource" "wait_for_talos_health" {
   depends_on = [
-    talos_cluster_kubeconfig.this
+    talos_cluster_kubeconfig.this,
+    hcloud_server.worker_server
   ]
 
   provisioner "local-exec" {
@@ -194,5 +195,45 @@ resource "null_resource" "wait_for_nodes_ready" {
 
   provisioner "local-exec" {
     command = "echo '${talos_cluster_kubeconfig.this.kubeconfig_raw}' > /tmp/kubeconfig && KUBECONFIG=/tmp/kubeconfig kubectl wait --for=condition=Ready nodes --all --timeout=600s"
+  }
+}
+
+# Apply node labels using Kubernetes provider
+resource "kubernetes_labels" "controlplane_labels" {
+  depends_on = [
+    null_resource.wait_for_nodes_ready
+  ]
+
+  api_version = "v1"
+  kind        = "Node"
+  metadata {
+    name = "talos-controlplane"
+  }
+  labels = {
+    "node.kubernetes.io/instance-type"     = var.controlplane_type
+    "topology.kubernetes.io/region"        = var.network_zone
+    "topology.kubernetes.io/zone"          = hcloud_server.controlplane_server.datacenter
+    "instance.hetzner.cloud/provided-by"   = "cloud"
+  }
+}
+
+resource "kubernetes_labels" "worker_labels" {
+  depends_on = [
+    null_resource.wait_for_nodes_ready
+  ]
+
+  for_each = var.workers
+  
+  api_version = "v1"
+  kind        = "Node"
+  metadata {
+    name = each.value.name
+  }
+  labels = {
+    "node.kubernetes.io/instance-type"     = each.value.server_type
+    "topology.kubernetes.io/region"        = var.network_zone
+    "topology.kubernetes.io/zone"          = hcloud_server.worker_server[each.key].datacenter
+    "instance.hetzner.cloud/provided-by"   = "cloud"
+    "openebs.io/engine"                    = "mayastor"
   }
 }
