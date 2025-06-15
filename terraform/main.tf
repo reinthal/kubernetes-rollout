@@ -173,3 +173,26 @@ resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = hcloud_server.controlplane_server.ipv4_address
 }
+
+
+# wait for talos controlplane health before continuing
+resource "null_resource" "wait_for_talos_health" {
+  depends_on = [
+    talos_cluster_kubeconfig.this
+  ]
+
+  provisioner "local-exec" {
+    command = "echo '${data.talos_client_configuration.this.talos_config}' > /tmp/talosconfig && TALOSCONFIG=/tmp/talosconfig talosctl health --nodes ${hcloud_server.controlplane_server.ipv4_address} --endpoints ${hcloud_server.controlplane_server.ipv4_address}"
+  }
+}
+
+# wait for all kubernetes nodes to be ready
+resource "null_resource" "wait_for_nodes_ready" {
+  depends_on = [
+    null_resource.wait_for_talos_health
+  ]
+
+  provisioner "local-exec" {
+    command = "echo '${talos_cluster_kubeconfig.this.kubeconfig_raw}' > /tmp/kubeconfig && KUBECONFIG=/tmp/kubeconfig kubectl wait --for=condition=Ready nodes --all --timeout=600s"
+  }
+}
