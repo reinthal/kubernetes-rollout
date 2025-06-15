@@ -1,0 +1,45 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: hcloud-csi
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://charts.hetzner.cloud
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hcloud-csi
+  namespace: kube-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: hcloud-csi
+      version: "2.x"
+      sourceRef:
+        kind: HelmRepository
+        name: hcloud-csi
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  dependsOn:
+    - name: hcloud-cloud-controller-manager
+      namespace: kube-system
+  valuesFrom:
+    - kind: Secret
+      name: hcloud-token
+      valuesKey: token
+      targetPath: controller.hcloudToken.value
+  values:
+    controller:
+      hcloudVolumeDefaultLocation: "fsn1"

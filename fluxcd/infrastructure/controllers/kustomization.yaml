@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - hcloud-ccm.yaml
+  - hcloud-csi.yaml
   - ingress-nginx.yaml
   - openebs.yaml
   - reflector.yaml
